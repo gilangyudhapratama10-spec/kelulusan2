@@ -74,24 +74,7 @@ button {
     border-radius: 15px;
 }
 
-.status {
-    padding: 12px;
-    border-radius: 10px;
-    font-weight: bold;
-    margin-top: 15px;
-    text-align: center;
-}
-
-.lulus {
-    background: #dcfce7;
-    color: #166534;
-}
-
-.tidak {
-    background: #fee2e2;
-    color: #991b1b;
-}
-
+/* TABEL */
 table {
     width: 100%;
     margin-top: 15px;
@@ -110,20 +93,64 @@ th {
     color: white;
 }
 
+.bold {
+    font-weight: bold;
+}
+
+.status {
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: bold;
+    margin-top: 15px;
+    text-align: center;
+}
+
+.lulus {
+    background: #dcfce7;
+    color: #166534;
+}
+
+.tidak {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
 .footer {
     text-align: right;
-    margin-top: 15px;
+    margin-top: 20px;
 }
 
 .print-btn {
     background: #16a34a;
 }
 
-.bold {
-    font-weight: bold;
+/* AREA PDF FULL A4 */
+#areaCetak {
+    width: 210mm;
+    min-height: 297mm;
+    background: white;
+    padding: 20mm;
+    margin: auto;
 }
 
+/* PRINT MODE */
 @media print {
+    body {
+        background: white;
+    }
+
+    .container {
+        box-shadow: none;
+        margin: 0;
+        padding: 0;
+        width: 100%;
+    }
+
+    .card {
+        background: white;
+        box-shadow: none;
+    }
+
     button, .input-box {
         display: none;
     }
@@ -150,9 +177,10 @@ th {
     <div class="result" id="result">
         <div class="card" id="areaCetak">
 
-            <div style="text-align:center; margin-bottom:15px;">
-                <img src="logo_sman10.png" style="width:100px"><br>
-                <b>SMAN 10 KABUPATEN TANGERANG</b><br>
+            <!-- HEADER PDF -->
+            <div style="text-align:center; margin-bottom:20px;">
+                <img src="logo_sman10.png" style="width:80px"><br>
+                <b style="font-size:18px;">SMAN 10 KABUPATEN TANGERANG</b><br>
                 <small>Tahun Pelajaran 2025/2026</small>
                 <hr>
             </div>
@@ -195,16 +223,11 @@ const dataSiswa = [
     nisn: "9988776655",
     tgl: "2005-01-01",
     nama: "Budi Santoso",
-    kelas: "Fase F L.1",
+    kelas: "XII IPA 1",
     nilai: [
         ["Agama",90],
         ["PPKN",92],
-        ["Indonesia",95],
-        ["Matematika",89],
-        ["Inggris",90],
-        ["Fisika",88],
-        ["Kimia",90],
-        ["Biologi",93]
+        ["Indonesia",95]
     ]
 }
 ];
@@ -227,17 +250,10 @@ function cekData() {
     const nisn = document.getElementById("nisn").value;
     const tgl = formatTanggal(document.getElementById("tgl").value);
 
-    if (!tgl) {
-        alert("Format tanggal salah!");
-        return;
-    }
+    if (!tgl) return alert("Format tanggal salah!");
 
     const siswa = dataSiswa.find(s => s.nisn === nisn && s.tgl === tgl);
-
-    if (!siswa) {
-        alert("Data tidak ditemukan!");
-        return;
-    }
+    if (!siswa) return alert("Data tidak ditemukan!");
 
     document.getElementById("result").style.display = "block";
 
@@ -245,10 +261,9 @@ function cekData() {
     document.getElementById("kelas").innerText = "Kelas: " + siswa.kelas;
     document.getElementById("info").innerText = "NISN: " + siswa.nisn;
 
+    let total = 0;
     let tbody = document.getElementById("tbody");
     tbody.innerHTML = "";
-
-    let total = 0;
 
     siswa.nilai.forEach((n, i) => {
         total += n[1];
@@ -265,33 +280,29 @@ function cekData() {
     document.getElementById("total").innerText = "Jumlah Nilai: " + total;
     document.getElementById("rata").innerText = "Rata-rata: " + rata.toFixed(2);
 
-    let statusDiv = document.getElementById("status");
+    let status = document.getElementById("status");
 
-    if (rata >= 70) {
-        statusDiv.innerText = "🎉 LULUS";
-        statusDiv.className = "status lulus";
+    if (rata >= 75) {
+        status.innerText = "🎉 LULUS";
+        status.className = "status lulus";
     } else {
-        statusDiv.innerText = "❌ TIDAK LULUS";
-        statusDiv.className = "status tidak";
+        status.innerText = "❌ TIDAK LULUS";
+        status.className = "status tidak";
     }
 }
 
-// FIX PDF ERROR + FALLBACK
 function cetakPDF() {
     const element = document.getElementById("areaCetak");
 
-    try {
-        html2pdf().set({
-            margin: 0.5,
-            filename: 'bukti_kelulusan.pdf',
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true },
-            jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
-        }).from(element).save();
-    } catch (e) {
-        alert("PDF gagal, menggunakan print biasa");
-        window.print();
-    }
+    const opt = {
+        margin: 0,
+        filename: 'bukti_kelulusan.pdf',
+        image: { type: 'jpeg', quality: 1 },
+        html2canvas: { scale: 3, useCORS: true, scrollY: 0 },
+        jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save();
 }
 
 </script>
